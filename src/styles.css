@@ -242,6 +242,7 @@
 @keyframes blob { 0%,100% { transform: translate(0,0) scale(1) } 33% { transform: translate(6%, -5%) scale(1.12) } 66% { transform: translate(-5%, 6%) scale(0.95) } }
 @keyframes flame { 0%,100% { transform: scale(1) rotate(-3deg) } 50% { transform: scale(1.18) rotate(3deg) } }
 @keyframes blink { 0%, 92%, 100% { transform: scaleY(1) } 96% { transform: scaleY(0.08) } }
+@keyframes wave { 0%,100% { transform: rotate(0) } 25% { transform: rotate(14deg) } 75% { transform: rotate(-10deg) } }
 
 .animate-blink { animation: blink 4.5s infinite; transform-origin: center }
 
