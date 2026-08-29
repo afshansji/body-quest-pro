@@ -1,9 +1,23 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BodyFigure } from "./BodyFigure";
-import boyAsset from "@/assets/body-parts-boy.png.asset.json";
+import { BodyOutline } from "./BodyOutline";
+import boyImg from "@/assets/body-parts-boy.png";
+import respiratoryImg from "@/assets/respiratory-body.png";
 import { Mascot, type Mood } from "./Mascot";
 import { Results } from "./Results";
 import { PENALTY, scoreForCorrect, type BodySystem, type Grade, type Part } from "@/game/systems";
+
+/** systems that use a photo/illustration board with an outline-then-reveal effect */
+const BOARD_IMG: Record<string, string> = {
+  "body-parts": boyImg,
+  respiratory: respiratoryImg,
+};
+const BOARD_ASPECT: Record<string, string> = {
+  "body-parts": "aspect-[848/1264]",
+  respiratory: "aspect-[201/437]",
+};
+/** radius (px) of the photo patch uncovered by each correctly placed part */
+const REVEAL_PX: Record<string, number> = { "body-parts": 70, respiratory: 52 };
 
 type Bubble = { id: number; x: number; y: number; text: string; tone: "good" | "bad" | "neutral" };
 type Spark = { id: number; x: number; y: number };
@@ -67,7 +81,8 @@ export function GameBoard({
   const remaining = tray.filter((p) => !placed[p.id]);
   const total = system.parts.length;
   const done = correct >= total && total > 0;
-  const accuracy = correct + mistakes === 0 ? 100 : Math.round((correct / (correct + mistakes)) * 100);
+  const accuracy =
+    correct + mistakes === 0 ? 100 : Math.round((correct / (correct + mistakes)) * 100);
   const shownScore = useCountUp(score);
 
   const activePart = drag?.part ?? selected;
@@ -146,14 +161,15 @@ export function GameBoard({
   // pointer drag
   useEffect(() => {
     if (!drag) return;
-    const move = (e: PointerEvent) => setDrag((d) => (d ? { ...d, x: e.clientX, y: e.clientY } : d));
+    const move = (e: PointerEvent) =>
+      setDrag((d) => (d ? { ...d, x: e.clientX, y: e.clientY } : d));
     const up = (e: PointerEvent) => {
       const el = document.elementFromPoint(e.clientX, e.clientY) as HTMLElement | null;
       const spotEl = el?.closest("[data-spot]") as HTMLElement | null;
       const current = drag;
       setDrag(null);
       if (spotEl && current) {
-        const spot = system.parts.find((p) => p.id === spotEl.dataset['spot']);
+        const spot = system.parts.find((p) => p.id === spotEl.dataset["spot"]);
         if (spot) attempt(spot, current.part);
       }
     };
@@ -175,6 +191,7 @@ export function GameBoard({
     : "Drag each organ from the tray onto the matching spot on the body.";
 
   const placedList = system.parts.filter((p) => placed[p.id]);
+  const boardImg = BOARD_IMG[system.id];
 
   return (
     <div className="relative min-h-screen">
@@ -203,7 +220,9 @@ export function GameBoard({
         {/* TRAY */}
         <section className="rounded-3xl bg-card p-4 shadow-[var(--shadow-soft)]">
           <h2 className="mb-3 font-display text-lg font-black">Tray</h2>
-          <p className="mb-3 text-xs text-muted-foreground">Drag a piece, or tap it then tap a spot.</p>
+          <p className="mb-3 text-xs text-muted-foreground">
+            Drag a piece, or tap it then tap a spot.
+          </p>
           <ul className="flex flex-wrap gap-2 lg:flex-col">
             {remaining.map((part, i) => (
               <li key={part.id}>
@@ -236,22 +255,66 @@ export function GameBoard({
         <section
           ref={boardRef}
           className={`relative mx-auto w-full max-w-[420px] overflow-hidden rounded-3xl bg-card shadow-[var(--shadow-soft)] ${
-            system.id === "body-parts" ? "aspect-[848/1264]" : "aspect-[1/1.7]"
+            BOARD_ASPECT[system.id] ?? "aspect-[1/1.7]"
           }`}
         >
-          {system.id === "body-parts" ? (
-            <img
-              src={boyAsset.url}
-              alt="Cartoon boy body"
-              className="pointer-events-none absolute inset-0 h-full w-full object-cover"
-              draggable={false}
-            />
+          {boardImg ? (
+            <>
+              {/* dashed cartoon outline shown until the round is complete */}
+              {!done &&
+                (system.id === "body-parts" ? (
+                  <BodyOutline placed={placedList.length} total={total} />
+                ) : (
+                  <img
+                    src={boardImg}
+                    alt={`${system.name} outline`}
+                    className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-[0.12] grayscale contrast-125"
+                    draggable={false}
+                  />
+                ))}
+              {/* full-colour body, revealed in a circle around each correctly placed part */}
+              {done ? (
+                <img
+                  src={boardImg}
+                  alt={system.name}
+                  className="pointer-events-none absolute inset-0 h-full w-full object-cover animate-[reveal_0.6s_ease-out_both]"
+                  draggable={false}
+                />
+              ) : (
+                placedList.map((p) => {
+                  // fixed-radius reveal so each drop only uncovers its own patch
+                  // (percentage stops resolve against the board diagonal → far too large)
+                  const r = REVEAL_PX[system.id] ?? 64;
+                  const mask = `radial-gradient(circle ${r}px at ${p.x}% ${p.y}%, #000 0, #000 ${r * 0.6}px, transparent ${r}px)`;
+                  return (
+                    <img
+                      key={p.id}
+                      src={boardImg}
+                      alt=""
+                      aria-hidden
+                      draggable={false}
+                      className="pointer-events-none absolute inset-0 h-full w-full object-cover animate-[reveal_0.55s_cubic-bezier(0.34,1.56,0.64,1)_both]"
+                      style={{
+                        WebkitMaskImage: mask,
+                        maskImage: mask,
+                        WebkitMaskRepeat: "no-repeat",
+                        maskRepeat: "no-repeat",
+                      }}
+                    />
+                  );
+                })
+              )}
+            </>
           ) : (
             <BodyFigure litParts={correct} />
           )}
           {/* air path */}
           {system.journey && placedList.length > 1 && (
-            <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="pointer-events-none absolute inset-0 h-full w-full">
+            <svg
+              viewBox="0 0 100 100"
+              preserveAspectRatio="none"
+              className="pointer-events-none absolute inset-0 h-full w-full"
+            >
               <polyline
                 points={system.parts
                   .filter((p) => placed[p.id])
@@ -280,7 +343,9 @@ export function GameBoard({
                     ? "border-[var(--success)] bg-[var(--success)] px-2 py-1 text-[var(--success-foreground)] animate-[snap_0.5s_cubic-bezier(0.34,1.56,0.64,1)]"
                     : "h-9 w-9 border-dashed border-primary/70 bg-background/70 text-muted-foreground"
                 } ${isTarget ? "animate-[magnet_1.1s_ease-in-out_infinite] border-solid" : ""} ${
-                  wrongSpot === spot.id ? "animate-[shake_0.4s_ease-in-out] !border-destructive !bg-destructive/70" : ""
+                  wrongSpot === spot.id
+                    ? "animate-[shake_0.4s_ease-in-out] !border-destructive !bg-destructive/70"
+                    : ""
                 }`}
                 style={{ left: `${spot.x}%`, top: `${spot.y}%` }}
               >
@@ -297,7 +362,11 @@ export function GameBoard({
             );
           })}
           {sparks.map((s) => (
-            <span key={s.id} className="pointer-events-none absolute" style={{ left: `${s.x}%`, top: `${s.y}%` }}>
+            <span
+              key={s.id}
+              className="pointer-events-none absolute"
+              style={{ left: `${s.x}%`, top: `${s.y}%` }}
+            >
               {Array.from({ length: 8 }).map((_, i) => (
                 <span
                   key={i}
@@ -363,7 +432,9 @@ export function GameBoard({
           <div className="rounded-3xl bg-accent p-4 shadow-[var(--shadow-soft)]">
             <div className="flex items-start gap-3">
               <Mascot mood={mood} size={78} />
-              <p className="min-w-0 flex-1 text-sm font-bold text-accent-foreground">{coach || initialCoach}</p>
+              <p className="min-w-0 flex-1 text-sm font-bold text-accent-foreground">
+                {coach || initialCoach}
+              </p>
             </div>
           </div>
         </section>
@@ -398,7 +469,9 @@ function Stat({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="rounded-2xl bg-secondary px-2 py-3">
       <div className="font-display text-xl font-black text-secondary-foreground">{value}</div>
-      <div className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">{label}</div>
+      <div className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+        {label}
+      </div>
     </div>
   );
 }

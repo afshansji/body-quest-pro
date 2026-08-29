@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="BodyQuest">
+  <rect width="64" height="64" rx="16" fill="#26b3ac" />
+  <path
+    d="M32 49C17.5 39.6 11 31.3 11 22.8A10.3 10.3 0 0 1 32 19a10.3 10.3 0 0 1 21 3.8C53 31.3 46.5 39.6 32 49Z"
+    fill="#ffffff"
+  />
+</svg>
