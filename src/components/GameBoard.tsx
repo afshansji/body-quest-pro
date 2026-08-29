@@ -11,7 +11,7 @@ function shuffle<T>(arr: T[]) {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
+    [a[i], a[j]] = [a[j]!, a[i]!];
   }
   return a;
 }
@@ -123,7 +123,7 @@ export function GameBoard({
           setCoach(
             nextCorrect >= total
               ? (system.journeyComplete ?? "All done!")
-              : system.journey[Math.min(nextCorrect, system.journey.length - 1)],
+              : system.journey[Math.min(nextCorrect, system.journey.length - 1)]!,
           );
         } else {
           setCoach(`Great! ${part.name} is in place.`);
@@ -152,7 +152,7 @@ export function GameBoard({
       const current = drag;
       setDrag(null);
       if (spotEl && current) {
-        const spot = system.parts.find((p) => p.id === spotEl.dataset.spot);
+        const spot = system.parts.find((p) => p.id === spotEl.dataset['spot']);
         if (spot) attempt(spot, current.part);
       }
     };
