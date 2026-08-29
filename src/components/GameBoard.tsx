@@ -236,7 +236,7 @@ export function GameBoard({
         <section
           ref={boardRef}
           className={`relative mx-auto w-full max-w-[420px] overflow-hidden rounded-3xl bg-card shadow-[var(--shadow-soft)] ${
-            system.id === "body-parts" ? "aspect-[570/910]" : "aspect-[1/1.7]"
+            system.id === "body-parts" ? "aspect-[848/1264]" : "aspect-[1/1.7]"
           }`}
         >
           {system.id === "body-parts" ? (
