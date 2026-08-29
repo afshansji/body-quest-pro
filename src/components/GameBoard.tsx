@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BodyFigure } from "./BodyFigure";
+import boyAsset from "@/assets/body-parts-boy.png.asset.json";
 import { Mascot, type Mood } from "./Mascot";
 import { Results } from "./Results";
 import { PENALTY, scoreForCorrect, type BodySystem, type Grade, type Part } from "@/game/systems";
