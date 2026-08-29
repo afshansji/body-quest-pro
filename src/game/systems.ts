@@ -50,9 +50,9 @@ export const SYSTEMS: BodySystem[] = [
     ranks: bodyRanks,
     parts: [
       { id: "head", name: "Head", icon: "🙂", fact: "Holds your brain, eyes, ears, nose, and mouth.", x: 42, y: 9 },
-      { id: "eye", name: "Eye", icon: "👁️", fact: "Lets you see colors, shapes, and everything around you.", x: 40, y: 18 },
+      { id: "eye", name: "Eye", icon: "👁️", fact: "Lets you see colors, shapes, and everything around you.", x: 40, y: 14 },
       { id: "ear", name: "Ear", icon: "👂", fact: "Collects sound on both sides of your head.", x: 30, y: 21 },
-      { id: "nose", name: "Nose", icon: "👃", fact: "Helps you smell and breathe in air.", x: 48, y: 20 },
+      { id: "nose", name: "Nose", icon: "👃", fact: "Helps you smell and breathe in air.", x: 48, y: 21 },
       { id: "mouth", name: "Mouth", icon: "👄", fact: "Used for eating, talking, and smiling.", x: 46, y: 24 },
       { id: "neck", name: "Neck", icon: "🧣", fact: "Connects your head to your body and lets you look around.", x: 44, y: 29 },
       { id: "arm", name: "Arm", icon: "💪", fact: "Connects your shoulder to your hand so you can reach and lift.", x: 28, y: 41 },
