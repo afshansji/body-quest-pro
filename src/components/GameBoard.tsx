@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BodyFigure } from "./BodyFigure";
+import boyAsset from "@/assets/body-parts-boy.png.asset.json";
 import { Mascot, type Mood } from "./Mascot";
 import { Results } from "./Results";
 import { PENALTY, scoreForCorrect, type BodySystem, type Grade, type Part } from "@/game/systems";
@@ -234,9 +235,20 @@ export function GameBoard({
         {/* BODY */}
         <section
           ref={boardRef}
-          className="relative mx-auto aspect-[1/1.7] w-full max-w-[420px] rounded-3xl bg-card shadow-[var(--shadow-soft)]"
+          className={`relative mx-auto w-full max-w-[420px] overflow-hidden rounded-3xl bg-card shadow-[var(--shadow-soft)] ${
+            system.id === "body-parts" ? "aspect-[848/1264]" : "aspect-[1/1.7]"
+          }`}
         >
-          <BodyFigure litParts={correct} />
+          {system.id === "body-parts" ? (
+            <img
+              src={boyAsset.url}
+              alt="Cartoon boy body"
+              className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+              draggable={false}
+            />
+          ) : (
+            <BodyFigure litParts={correct} />
+          )}
           {/* air path */}
           {system.journey && placedList.length > 1 && (
             <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="pointer-events-none absolute inset-0 h-full w-full">
