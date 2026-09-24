@@ -6,3 +6,4 @@ minimumReleaseAge = 86400
 # before adding any.
 minimumReleaseAgeExcludes = ["@lovable.dev/vite-tanstack-config"]
    
+   
